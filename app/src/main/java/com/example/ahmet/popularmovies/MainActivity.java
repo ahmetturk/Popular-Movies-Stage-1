@@ -3,12 +3,15 @@ package com.example.ahmet.popularmovies;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.example.ahmet.popularmovies.models.Movie;
 
@@ -71,6 +74,25 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         startActivity(intent);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.popular_movies, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
@@ -92,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 urlConnection.connect();
 
                 InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder builder = new StringBuilder();
                 if (inputStream == null) {
                     return null;
                 }
@@ -100,15 +122,15 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
+                    builder.append(line).append("\n");
                 }
 
-                if (buffer.length() == 0)
+                if (builder.length() == 0)
                 {
                     return null;
                 }
 
-                moviesJsonStr = buffer.toString();
+                moviesJsonStr = builder.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, e.getMessage());
                 e.printStackTrace();
