@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private static final int SPAN_COUNT = 2;
 
     private MovieAdapter mMoviesAdapter;
+    private RecyclerViewScrollListener scrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,15 +53,29 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mMoviesAdapter = new MovieAdapter(this, this);
         recyclerView.setAdapter(mMoviesAdapter);
 
-        populateUI();
+        scrollListener = new RecyclerViewScrollListener(gridLayoutManager) {
+            @Override
+            public void onLoadMore(int page) {
+                fetchNewMovies(page);
+                Log.d(MainActivity.class.getSimpleName(), "Hello");
+            }
+        };
+
+        recyclerView.addOnScrollListener(scrollListener);
     }
 
     private void populateUI() {
+        scrollListener.resetState();
+        mMoviesAdapter.clearMoviesList();
+        fetchNewMovies(1);
+    }
+
+    private void fetchNewMovies(int page) {
         int sorting = PopularMoviesPreferences.getSorting(this);
         String sortMethod = getResources().getStringArray(R.array.sort_pref_list)[sorting];
 
         FetchMoviesTask moviesTask = new FetchMoviesTask();
-        moviesTask.execute(sortMethod);
+        moviesTask.execute(sortMethod, String.valueOf(page));
     }
 
     @Override
@@ -106,9 +122,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         @Override
         protected List<Movie> doInBackground(String... params) {
-
             try {
-                URL url = new URL("https://api.themoviedb.org/3/movie/" + params[0] + "?api_key=" + API_KEY);
+                URL url = new URL("https://api.themoviedb.org/3/movie/" + params[0] + "?api_key=" + API_KEY + "&page=" + params[1]);
 
                 String jsonMoviesResponse = getResponseFromHttpUrl(url);
 
@@ -118,56 +133,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 e.printStackTrace();
                 return null;
             }
-
-            /*try {
-                // params[0] is the sort method of movies
-
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuilder builder = new StringBuilder();
-                if (inputStream == null) {
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    builder.append(line).append("\n");
-                }
-
-                if (builder.length() == 0)
-                {
-                    return null;
-                }
-
-                jsonMoviesResponse = builder.toString();
-                jsonMoviesResponse
-            } catch (IOException e) {
-                Log.e(LOG_TAG, e.getMessage());
-                e.printStackTrace();
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    }
-                    catch (IOException e) {
-                        Log.e(LOG_TAG, e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-            }*/
         }
 
         @Override
         protected void onPostExecute(List<Movie> moviesList) {
             super.onPostExecute(moviesList);
-            mMoviesAdapter.setMoviesList(moviesList);
+            mMoviesAdapter.addMoviesList(moviesList);
         }
 
         private String getResponseFromHttpUrl(URL url) throws IOException {

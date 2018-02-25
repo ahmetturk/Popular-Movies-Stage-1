@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import com.example.ahmet.popularmovies.models.Movie;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
@@ -46,9 +47,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         }
     }
 
-    public void setMoviesList(List<Movie> moviesList) {
-        mMoviesList = moviesList;
-        notifyDataSetChanged();
+    void clearMoviesList() {
+        if (mMoviesList == null) {
+            mMoviesList = new ArrayList<>();
+        } else {
+            int itemCount = mMoviesList.size();
+            mMoviesList.clear();
+            notifyItemRangeRemoved(0, itemCount);
+        }
+    }
+
+    void addMoviesList(List<Movie> moviesList) {
+        int positionStart = mMoviesList.size();
+        mMoviesList.addAll(moviesList);
+        notifyItemRangeInserted(positionStart, moviesList.size());
     }
 
     public interface MovieAdapterOnClickHandler {
