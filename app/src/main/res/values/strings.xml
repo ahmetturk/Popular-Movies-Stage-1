@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Popular Movies</string>
-    <string name="action_settings">Settings</string>
 
-    <string name="content_description_movie_item">Movie Poster</string>
-
-    <!-- For Settings-->
-    <string name="pref_sort_label">Sort Order</string>
+    <!--Shared Preferences key-->
     <string name="pref_sort_key" translatable="false">sort_order</string>
-    <string name="pref_sort_popular" translatable="false">popularity.desc</string>
+
+    <!--Menu item name for sorting spinner-->
+    <string name="action_sort">Sorting</string>
+
+    <!--For Sort Preference-->
+    <string name="pref_sort_popular" translatable="false">popular</string>
     <string name="pref_sort_label_popular">Most Popular</string>
-    <string name="pref_sort_highest_rated" translatable="false">vote_average.desc&amp;vote_count.gte=200</string>
+    <string name="pref_sort_highest_rated" translatable="false">top_rated</string>
     <string name="pref_sort_label_highest_rated">Highest Rated</string>
 
+    <string name="content_description_movie_item">Movie Poster</string>
 </resources>

@@ -1,17 +1,18 @@
 package com.example.ahmet.popularmovies;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.example.ahmet.popularmovies.models.Movie;
 
@@ -32,6 +33,7 @@ import static com.example.ahmet.popularmovies.BuildConfig.API_KEY;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
+    // Grid Layout Horizontal Item Count
     private static final int SPAN_COUNT = 2;
 
     private MovieAdapter mMoviesAdapter;
@@ -48,17 +50,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         mMoviesAdapter = new MovieAdapter(this, this);
         recyclerView.setAdapter(mMoviesAdapter);
+
+        populateUI();
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        updateMovies();
-    }
+    private void populateUI() {
+        int sorting = PopularMoviesPreferences.getSorting(this);
+        String sortMethod = getResources().getStringArray(R.array.sort_pref_list)[sorting];
 
-    private void updateMovies() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        String sortMethod = sharedPref.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
         FetchMoviesTask moviesTask = new FetchMoviesTask();
         moviesTask.execute(sortMethod);
     }
@@ -78,37 +77,51 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.popular_movies, menu);
+
+        MenuItem item = menu.findItem(R.id.sort_spinner);
+        Spinner spinner = (Spinner) item.getActionView();
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.sort_spinner_list, R.layout.sort_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setSelection(PopularMoviesPreferences.getSorting(MainActivity.this));
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                PopularMoviesPreferences.setSorting(MainActivity.this, i);
+                populateUI();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
 
-        private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
-
         @Override
         protected List<Movie> doInBackground(String... params) {
 
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            // It will contain the raw JSON response as a string
-            String moviesJsonStr = null;
-
             try {
+                URL url = new URL("https://api.themoviedb.org/3/movie/" + params[0] + "?api_key=" + API_KEY);
+
+                String jsonMoviesResponse = getResponseFromHttpUrl(url);
+
+                return getMoviesDataFromJson(jsonMoviesResponse);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            /*try {
                 // params[0] is the sort method of movies
-                URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by=" + params[0] + "&api_key=" + API_KEY);
+
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -130,7 +143,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     return null;
                 }
 
-                moviesJsonStr = builder.toString();
+                jsonMoviesResponse = builder.toString();
+                jsonMoviesResponse
             } catch (IOException e) {
                 Log.e(LOG_TAG, e.getMessage());
                 e.printStackTrace();
@@ -147,21 +161,38 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                         e.printStackTrace();
                     }
                 }
-            }
-
-            try {
-                return getMoviesDataFromJson(moviesJsonStr);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage());
-                e.printStackTrace();
-            }
-            return null;
+            }*/
         }
 
         @Override
         protected void onPostExecute(List<Movie> moviesList) {
             super.onPostExecute(moviesList);
             mMoviesAdapter.setMoviesList(moviesList);
+        }
+
+        private String getResponseFromHttpUrl(URL url) throws IOException {
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            try {
+                InputStream inputStream = urlConnection.getInputStream();
+                if (inputStream == null) {
+                    return null;
+                }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                StringBuilder builder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line).append("\n");
+                }
+
+                if (builder.length() == 0) {
+                    return null;
+                }
+
+                return builder.toString();
+            } finally {
+                urlConnection.disconnect();
+            }
         }
 
         private List<Movie> getMoviesDataFromJson(String moviesJsonStr) throws JSONException {
@@ -171,15 +202,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             JSONArray movies =  jsonObject.getJSONArray("results");
             for(int i = 0; i < movies.length(); i++) {
                 JSONObject movieDetail = movies.getJSONObject(i);
-                // 0 is image url of the poster of movie
-                // 1 is original name of movie
-                // 2 is release date of movie
-                // 3 is user rating of movie
-                // 4 is plot synopsis of movie
+
+                /* imageUrl is image url of the poster of movie
+                 * movieName is original name of movie
+                 * releaseDate is release date of movie
+                 * userRating is user rating of movie
+                 * plotSynopsis is plot synopsis of movie */
+
                 String imageUrl = "http://image.tmdb.org/t/p/w185/" + movieDetail.getString("poster_path");
                 String movieName = movieDetail.getString("original_title");
                 String releaseDate = movieDetail.getString("release_date");
-                String userRating = movieDetail.getString("vote_average") + "/10";
+                String userRating = movieDetail.getString("vote_average");
                 String plotSynopsis = movieDetail.getString("overview");
 
                 moviesList.add(new Movie(imageUrl, movieName, releaseDate, userRating, plotSynopsis));
