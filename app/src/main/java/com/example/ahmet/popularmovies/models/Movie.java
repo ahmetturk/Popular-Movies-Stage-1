@@ -1,57 +1,80 @@
 package com.example.ahmet.popularmovies.models;
 
-public class Movie {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Movie implements Parcelable {
+    public static final Parcelable.Creator<Movie> CREATOR
+            = new Parcelable.Creator<Movie>() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
     private String movieTitle;
-    private String moviePoster;
+    private String posterPath;
     private String plotSynopsis;
     private String userRating;
     private String releaseDate;
+    private String backdropPath;
 
-    public Movie(String moviePoster, String movieTitle, String releaseDate, String userRating, String plotSynopsis) {
-        this.moviePoster = moviePoster;
+    public Movie(String movieTitle, String posterPath, String plotSynopsis, String userRating, String releaseDate, String backdropPath) {
         this.movieTitle = movieTitle;
-        this.releaseDate = releaseDate;
-        this.userRating = userRating;
+        this.posterPath = posterPath;
         this.plotSynopsis = plotSynopsis;
+        this.userRating = userRating;
+        this.releaseDate = releaseDate;
+        this.backdropPath = backdropPath;
     }
 
-    public String getMoviePoster() {
-        return moviePoster;
-    }
-
-    public void setMoviePoster(String moviePoster) {
-        this.moviePoster = moviePoster;
+    private Movie(Parcel in) {
+        this.movieTitle = in.readString();
+        this.posterPath = in.readString();
+        this.plotSynopsis = in.readString();
+        this.userRating = in.readString();
+        this.releaseDate = in.readString();
+        this.backdropPath = in.readString();
     }
 
     public String getMovieTitle() {
         return movieTitle;
     }
 
-    public void setMovieTitle(String movieTitle) {
-        this.movieTitle = movieTitle;
-    }
-
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
-    public String getUserRating() {
-        return userRating;
-    }
-
-    public void setUserRating(String userRating) {
-        this.userRating = userRating;
+    public String getPosterPath() {
+        return posterPath;
     }
 
     public String getPlotSynopsis() {
         return plotSynopsis;
     }
 
-    public void setPlotSynopsis(String plotSynopsis) {
-        this.plotSynopsis = plotSynopsis;
+    public String getUserRating() {
+        return userRating;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(movieTitle);
+        parcel.writeString(posterPath);
+        parcel.writeString(plotSynopsis);
+        parcel.writeString(userRating);
+        parcel.writeString(releaseDate);
+        parcel.writeString(backdropPath);
     }
 }

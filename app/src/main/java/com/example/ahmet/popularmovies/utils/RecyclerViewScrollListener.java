@@ -1,16 +1,16 @@
-package com.example.ahmet.popularmovies;
+package com.example.ahmet.popularmovies.utils;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-abstract class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
+abstract public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
     private GridLayoutManager mLayoutManager;
     private int previousTotalItemCount = 10;
     private int page = 2;
     private boolean loading = true;
 
-    public RecyclerViewScrollListener(GridLayoutManager layoutManager) {
+    protected RecyclerViewScrollListener(GridLayoutManager layoutManager) {
         mLayoutManager = layoutManager;
     }
 

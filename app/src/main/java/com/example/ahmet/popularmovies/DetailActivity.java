@@ -1,51 +1,95 @@
 package com.example.ahmet.popularmovies;
 
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.ahmet.popularmovies.models.Movie;
 import com.squareup.picasso.Picasso;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.squareup.picasso.Target;
 
 
 public class DetailActivity extends AppCompatActivity {
+
+    public static final String DETAIL_INTENT_KEY = "detail_intent_key";
+
+    private TextView movieTitleTv;
+    private TextView releaseDateTv;
+    private TextView userRatingTv;
+    private TextView plotSynopsisTv;
+    private ImageView backdropIv;
+    private ImageView posterIv;
+
+    private Target targetBackdrop;
+
+    private CollapsingToolbarLayout collapsingToolbar;
+
+    private Movie movie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        Intent intent = getIntent();
-        String movieTitle = intent.getStringExtra("movieTitle");
-        String moviePoster = intent.getStringExtra("moviePoster");
-        String releaseDate = intent.getStringExtra("releaseDate");
-        String userRating = intent.getStringExtra("userRating");
-        String plotSynopsis = intent.getStringExtra("plotSynopsis");
-        ImageView moviePosterImageView = findViewById(R.id.movie_poster);
-        Picasso.with(this).load(moviePoster).into(moviePosterImageView);
-        TextView movieTitleTextView = findViewById(R.id.movie_title);
-        movieTitleTextView.setText(movieTitle);
-        try {
-            Date date = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(releaseDate);
-            releaseDate = DateFormat.getDateInstance().format(date);
-        }
-        catch (ParseException e) {
-            Log.e("DetailActivity", e.getMessage(), e);
-        }
-        TextView releaseDateTextView = findViewById(R.id.release_date);
-        releaseDateTextView.setText(releaseDate);
-        TextView userRatingTextView = findViewById(R.id.user_rating);
-        userRatingTextView.setText(userRating);
-        TextView plotSynopsisTextView = findViewById(R.id.plot_synopsis);
-        plotSynopsisTextView.setText(plotSynopsis);
+        movieTitleTv = findViewById(R.id.movieTitleTv);
+        releaseDateTv = findViewById(R.id.releaseDateTv);
+        userRatingTv = findViewById(R.id.userRatingTv);
+        plotSynopsisTv = findViewById(R.id.plotSynopsisTv);
+        backdropIv = findViewById(R.id.backdrop);
+        posterIv = findViewById(R.id.poster);
 
+        movie = getIntent().getParcelableExtra(DETAIL_INTENT_KEY);
+
+        collapsingToolbar = findViewById(R.id.collapsing_toolbar);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(movie.getMovieTitle());
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        populateUI();
+    }
+
+    private void populateUI() {
+        movieTitleTv.setText(movie.getMovieTitle());
+        releaseDateTv.setText(movie.getReleaseDate());
+        userRatingTv.setText(getString(R.string.user_rating_text, movie.getUserRating()));
+        plotSynopsisTv.setText(movie.getPlotSynopsis());
+
+        targetBackdrop = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                backdropIv.setImageBitmap(bitmap);
+                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                    @Override
+                    public void onGenerated(@NonNull Palette palette) {
+                        int color = palette.getVibrantColor(R.attr.colorPrimary);
+                        collapsingToolbar.setContentScrimColor(color);
+                        collapsingToolbar.setStatusBarScrimColor(color);
+                    }
+                });
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+            }
+        };
+        Picasso.with(this).load(movie.getBackdropPath()).into(targetBackdrop);
+
+        Picasso.with(this).load(movie.getPosterPath()).into(posterIv);
     }
 }

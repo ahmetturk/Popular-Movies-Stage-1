@@ -1,12 +1,12 @@
 package com.example.ahmet.popularmovies;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,6 +16,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.example.ahmet.popularmovies.models.Movie;
+import com.example.ahmet.popularmovies.utils.GridItemDecoration;
+import com.example.ahmet.popularmovies.utils.RecyclerViewScrollListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, SPAN_COUNT);
         recyclerView.setLayoutManager(gridLayoutManager);
 
+        recyclerView.addItemDecoration(new GridItemDecoration(this));
+
         mMoviesAdapter = new MovieAdapter(this, this);
         recyclerView.setAdapter(mMoviesAdapter);
 
@@ -57,11 +61,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             @Override
             public void onLoadMore(int page) {
                 fetchNewMovies(page);
-                Log.d(MainActivity.class.getSimpleName(), "Hello");
             }
         };
 
         recyclerView.addOnScrollListener(scrollListener);
+
     }
 
     private void populateUI() {
@@ -81,11 +85,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     public void onClick(Movie movie) {
         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-        intent.putExtra("moviePoster", movie.getMoviePoster());
-        intent.putExtra("movieTitle", movie.getMovieTitle());
-        intent.putExtra("releaseDate", movie.getReleaseDate());
-        intent.putExtra("userRating", movie.getUserRating());
-        intent.putExtra("plotSynopsis", movie.getPlotSynopsis());
+        intent.putExtra(DetailActivity.DETAIL_INTENT_KEY, movie);
         startActivity(intent);
     }
 
@@ -123,7 +123,15 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         @Override
         protected List<Movie> doInBackground(String... params) {
             try {
-                URL url = new URL("https://api.themoviedb.org/3/movie/" + params[0] + "?api_key=" + API_KEY + "&page=" + params[1]);
+                String language = getString(R.string.language);
+
+                Uri uri = Uri.parse("https://api.themoviedb.org/3/movie/").buildUpon()
+                        .appendPath(params[0])
+                        .appendQueryParameter("api_key", API_KEY)
+                        .appendQueryParameter("language", language)
+                        .appendQueryParameter("page", params[1])
+                        .build();
+                URL url = new URL(uri.toString());
 
                 String jsonMoviesResponse = getResponseFromHttpUrl(url);
 
@@ -174,19 +182,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             for(int i = 0; i < movies.length(); i++) {
                 JSONObject movieDetail = movies.getJSONObject(i);
 
-                /* imageUrl is image url of the poster of movie
+                /* posterPath is image url of the poster of movie
                  * movieName is original name of movie
                  * releaseDate is release date of movie
                  * userRating is user rating of movie
                  * plotSynopsis is plot synopsis of movie */
 
-                String imageUrl = "http://image.tmdb.org/t/p/w185/" + movieDetail.getString("poster_path");
-                String movieName = movieDetail.getString("original_title");
+                String posterPath = "http://image.tmdb.org/t/p/w185/" + movieDetail.getString("poster_path");
+                String movieName = movieDetail.getString("title");
                 String releaseDate = movieDetail.getString("release_date");
                 String userRating = movieDetail.getString("vote_average");
                 String plotSynopsis = movieDetail.getString("overview");
+                String backdropPath = "http://image.tmdb.org/t/p/w300/" + movieDetail.getString("backdrop_path");
 
-                moviesList.add(new Movie(imageUrl, movieName, releaseDate, userRating, plotSynopsis));
+                moviesList.add(new Movie(movieName, posterPath, plotSynopsis, userRating, releaseDate, backdropPath));
             }
             return moviesList;
         }
