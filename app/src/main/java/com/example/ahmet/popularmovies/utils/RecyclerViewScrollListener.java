@@ -5,7 +5,7 @@ import android.support.v7.widget.RecyclerView;
 
 abstract public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
-    private GridLayoutManager mLayoutManager;
+    private final GridLayoutManager mLayoutManager;
     private int previousTotalItemCount = 10;
     private int page = 2;
     private boolean loading = true;

@@ -14,12 +14,13 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
-    private String movieTitle;
-    private String posterPath;
-    private String plotSynopsis;
-    private String userRating;
-    private String releaseDate;
-    private String backdropPath;
+
+    private final String movieTitle;
+    private final String posterPath;
+    private final String plotSynopsis;
+    private final String userRating;
+    private final String releaseDate;
+    private final String backdropPath;
 
     public Movie(String movieTitle, String posterPath, String plotSynopsis, String userRating, String releaseDate, String backdropPath) {
         this.movieTitle = movieTitle;

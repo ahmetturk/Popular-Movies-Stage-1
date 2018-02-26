@@ -10,7 +10,7 @@ import com.example.ahmet.popularmovies.R;
 
 public class GridItemDecoration extends RecyclerView.ItemDecoration {
 
-    private Context mContext;
+    private final Context mContext;
 
     public GridItemDecoration(Context context) {
         this.mContext = context;
