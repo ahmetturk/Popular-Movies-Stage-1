@@ -23,4 +23,6 @@
     <string name="user_rating">User Score</string>
     <string name="user_rating_text">%1$s/10</string>
     <string name="plot_synopsis">Overview</string>
+
+    <string name="no_internet">No internet connection Swipe to refresh</string>
 </resources>

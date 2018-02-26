@@ -28,19 +28,18 @@ public class GridItemDecoration extends RecyclerView.ItemDecoration {
         }
 
         int itemDivider = mContext.getResources().getDimensionPixelSize(R.dimen.grid_item_divider);
+        int itemDividerTwo = itemDivider + itemDivider;
 
         int itemSpanIndex = layoutParams.getSpanIndex();
 
+        outRect.top = itemDividerTwo;
+        outRect.bottom = 0;
         if (itemSpanIndex == 0) {
-            outRect.left = itemDivider;
-            outRect.top = itemDivider;
+            outRect.left = itemDividerTwo;
             outRect.right = itemDivider;
-            outRect.bottom = 0;
         } else {
-            outRect.left = 0;
-            outRect.top = itemDivider;
-            outRect.right = itemDivider;
-            outRect.bottom = 0;
+            outRect.left = itemDivider;
+            outRect.right = itemDividerTwo;
         }
     }
 }

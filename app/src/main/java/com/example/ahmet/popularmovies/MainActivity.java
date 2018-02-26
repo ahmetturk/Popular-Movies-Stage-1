@@ -1,9 +1,13 @@
 package com.example.ahmet.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +18,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.ahmet.popularmovies.models.Movie;
 import com.example.ahmet.popularmovies.utils.GridItemDecoration;
@@ -39,14 +44,25 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     // Grid Layout Horizontal Item Count
     private static final int SPAN_COUNT = 2;
 
+    // JSON Keys
+    private static final String MOVIE_TITLE_KEY = "title";
+    private static final String POSTER_PATH_KEY = "poster_path";
+    private static final String PLOT_SYNOPSIS_KEY = "overview";
+    private static final String USER_RATING_KEY = "vote_average";
+    private static final String RELEASE_DATE_KEY = "release_date";
+    private static final String BACKDROP_PATH_KEY = "backdrop_path";
+
     private MovieAdapter mMoviesAdapter;
-    private RecyclerViewScrollListener scrollListener;
+    private RecyclerViewScrollListener mScrollListener;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private TextView internetStatusTv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        internetStatusTv = findViewById(R.id.internet_status);
         RecyclerView recyclerView = findViewById(R.id.movies_list);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, SPAN_COUNT);
@@ -57,19 +73,26 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mMoviesAdapter = new MovieAdapter(this, this);
         recyclerView.setAdapter(mMoviesAdapter);
 
-        scrollListener = new RecyclerViewScrollListener(gridLayoutManager) {
+        mScrollListener = new RecyclerViewScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int page) {
                 fetchNewMovies(page);
             }
         };
 
-        recyclerView.addOnScrollListener(scrollListener);
+        recyclerView.addOnScrollListener(mScrollListener);
 
+        mSwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                populateUI();
+            }
+        });
     }
 
     private void populateUI() {
-        scrollListener.resetState();
+        mScrollListener.resetState();
         mMoviesAdapter.clearMoviesList();
         fetchNewMovies(1);
     }
@@ -118,7 +141,24 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return true;
     }
 
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null) {
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            return netInfo != null && netInfo.isConnectedOrConnecting();
+        }
+        return false;
+    }
+
     class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            if (!isOnline()) {
+                internetStatusTv.setVisibility(View.VISIBLE);
+            }
+        }
 
         @Override
         protected List<Movie> doInBackground(String... params) {
@@ -146,7 +186,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         @Override
         protected void onPostExecute(List<Movie> moviesList) {
             super.onPostExecute(moviesList);
-            mMoviesAdapter.addMoviesList(moviesList);
+            mSwipeRefreshLayout.setRefreshing(false);
+            if (moviesList != null) {
+                internetStatusTv.setVisibility(View.GONE);
+                mMoviesAdapter.addMoviesList(moviesList);
+            }
         }
 
         private String getResponseFromHttpUrl(URL url) throws IOException {
@@ -178,22 +222,23 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             List<Movie> moviesList = new ArrayList<>();
 
             JSONObject jsonObject = new JSONObject(moviesJsonStr);
-            JSONArray movies =  jsonObject.getJSONArray("results");
-            for(int i = 0; i < movies.length(); i++) {
+            JSONArray movies = jsonObject.getJSONArray("results");
+            for (int i = 0; i < movies.length(); i++) {
                 JSONObject movieDetail = movies.getJSONObject(i);
 
-                /* posterPath is image url of the poster of movie
-                 * movieName is original name of movie
-                 * releaseDate is release date of movie
+                /* movieName is original name of movie
+                 * posterPath is image url of the poster of movie
+                 * plotSynopsis is plot synopsis of movie
                  * userRating is user rating of movie
-                 * plotSynopsis is plot synopsis of movie */
+                 * releaseDate is release date of movie
+                 * backdropPath is image url of the backdrop of movie*/
 
-                String posterPath = "http://image.tmdb.org/t/p/w185/" + movieDetail.getString("poster_path");
-                String movieName = movieDetail.getString("title");
-                String releaseDate = movieDetail.getString("release_date");
-                String userRating = movieDetail.getString("vote_average");
-                String plotSynopsis = movieDetail.getString("overview");
-                String backdropPath = "http://image.tmdb.org/t/p/w300/" + movieDetail.getString("backdrop_path");
+                String movieName = movieDetail.getString(MOVIE_TITLE_KEY);
+                String posterPath = "http://image.tmdb.org/t/p/w185/" + movieDetail.getString(POSTER_PATH_KEY);
+                String plotSynopsis = movieDetail.getString(PLOT_SYNOPSIS_KEY);
+                String userRating = movieDetail.getString(USER_RATING_KEY);
+                String releaseDate = movieDetail.getString(RELEASE_DATE_KEY);
+                String backdropPath = "http://image.tmdb.org/t/p/w300/" + movieDetail.getString(BACKDROP_PATH_KEY);
 
                 moviesList.add(new Movie(movieName, posterPath, plotSynopsis, userRating, releaseDate, backdropPath));
             }

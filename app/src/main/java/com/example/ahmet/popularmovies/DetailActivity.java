@@ -18,7 +18,7 @@ import com.squareup.picasso.Target;
 
 public class DetailActivity extends AppCompatActivity {
 
-    public static final String DETAIL_INTENT_KEY = "detail_intent_key";
+    public static final String DETAIL_INTENT_KEY = "com.example.ahmet.popularmovies.detail";
 
     private TextView movieTitleTv;
     private TextView releaseDateTv;
