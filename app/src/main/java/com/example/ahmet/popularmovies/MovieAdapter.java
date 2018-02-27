@@ -14,6 +14,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
     private final Context mContext;
@@ -37,7 +40,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         Movie movie = mMoviesList.get(position);
 
         holder.movieTitleTv.setText(movie.getMovieTitle());
-        Picasso.with(mContext).load(movie.getPosterPath()).into(holder.movieItemIv);
+        Picasso.with(mContext)
+                .load(movie.getPosterPath())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.error)
+                .into(holder.movieItemIv);
     }
 
     @Override
@@ -70,13 +77,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        final TextView movieTitleTv;
-        final ImageView movieItemIv;
+        @BindView(R.id.movie_title_tv)
+        TextView movieTitleTv;
+        @BindView(R.id.movie_item_iv)
+        ImageView movieItemIv;
 
         MovieAdapterViewHolder(View view) {
             super(view);
-            movieTitleTv = view.findViewById(R.id.movie_title_tv);
-            movieItemIv = view.findViewById(R.id.movie_item_iv);
+            ButterKnife.bind(this, view);
             view.setOnClickListener(this);
         }
 

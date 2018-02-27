@@ -15,16 +15,25 @@ import com.example.ahmet.popularmovies.models.Movie;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class DetailActivity extends AppCompatActivity {
 
     public static final String DETAIL_INTENT_KEY = "com.example.ahmet.popularmovies.detail";
 
+    @BindView(R.id.movieTitleTv)
     private TextView movieTitleTv;
+    @BindView(R.id.releaseDateTv)
     private TextView releaseDateTv;
+    @BindView(R.id.userRatingTv)
     private TextView userRatingTv;
+    @BindView(R.id.plotSynopsisTv)
     private TextView plotSynopsisTv;
+    @BindView(R.id.backdrop)
     private ImageView backdropIv;
+    @BindView(R.id.poster)
     private ImageView posterIv;
 
     private Target targetBackdrop;
@@ -37,13 +46,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-
-        movieTitleTv = findViewById(R.id.movieTitleTv);
-        releaseDateTv = findViewById(R.id.releaseDateTv);
-        userRatingTv = findViewById(R.id.userRatingTv);
-        plotSynopsisTv = findViewById(R.id.plotSynopsisTv);
-        backdropIv = findViewById(R.id.backdrop);
-        posterIv = findViewById(R.id.poster);
+        ButterKnife.bind(this);
 
         movie = getIntent().getParcelableExtra(DETAIL_INTENT_KEY);
 
@@ -88,8 +91,14 @@ public class DetailActivity extends AppCompatActivity {
             public void onPrepareLoad(Drawable placeHolderDrawable) {
             }
         };
-        Picasso.with(this).load(movie.getBackdropPath()).into(targetBackdrop);
+        Picasso.with(this)
+                .load(movie.getBackdropPath())
+                .into(targetBackdrop);
 
-        Picasso.with(this).load(movie.getPosterPath()).into(posterIv);
+        Picasso.with(this)
+                .load(movie.getPosterPath())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.error)
+                .into(posterIv);
     }
 }
