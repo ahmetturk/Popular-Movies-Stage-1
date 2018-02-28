@@ -32,11 +32,11 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler, AsyncTaskCompleteListener<List<Movie>> {
 
     @BindView(R.id.swipeRefreshLayout)
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.internet_status)
-    private TextView internetStatusTv;
+    TextView internetStatusTv;
     @BindView(R.id.movies_list)
-    private RecyclerView recyclerView;
+    RecyclerView recyclerView;
     private MovieAdapter mMoviesAdapter;
     private RecyclerViewScrollListener mScrollListener;
 
