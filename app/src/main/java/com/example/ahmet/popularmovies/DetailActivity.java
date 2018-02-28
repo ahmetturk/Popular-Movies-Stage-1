@@ -24,17 +24,17 @@ public class DetailActivity extends AppCompatActivity {
     public static final String DETAIL_INTENT_KEY = "com.example.ahmet.popularmovies.detail";
 
     @BindView(R.id.movieTitleTv)
-    private TextView movieTitleTv;
+    TextView movieTitleTv;
     @BindView(R.id.releaseDateTv)
-    private TextView releaseDateTv;
+    TextView releaseDateTv;
     @BindView(R.id.userRatingTv)
-    private TextView userRatingTv;
+    TextView userRatingTv;
     @BindView(R.id.plotSynopsisTv)
-    private TextView plotSynopsisTv;
+    TextView plotSynopsisTv;
     @BindView(R.id.backdrop)
-    private ImageView backdropIv;
+    ImageView backdropIv;
     @BindView(R.id.poster)
-    private ImageView posterIv;
+    ImageView posterIv;
 
     private Target targetBackdrop;
 
