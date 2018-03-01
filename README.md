@@ -21,4 +21,4 @@ The app has two main screens
 - Run app
 
 ## Screenshots
-<img src="https://resmim.net/f/yqf9yL.png" width="240px"> <img src="https://resmim.net/f/WIU6Us.png" width="240px">
+<img src="https://i.hizliresim.com/oOylk7.png" width="240px"> <img src="https://i.hizliresim.com/lO4RWE.png" width="240px">
