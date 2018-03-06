@@ -21,4 +21,4 @@ The app has two main screens
 - Run app
 
 ## Screenshots
-<img src="https://i.hizliresim.com/oOylk7.png" width="240px"> <img src="https://i.hizliresim.com/lO4RWE.png" width="240px">
+<img src="https://scontent-otp1-1.xx.fbcdn.net/v/t31.0-8/28515904_166398364015036_5274720578028293002_o.jpg?oh=011aac85f213827d48bad44e482318f6&oe=5B45D5AD" width="240px"> <img src="https://scontent-otp1-1.xx.fbcdn.net/v/t31.0-8/28617126_166398347348371_6110070311526625573_o.jpg?oh=37ed54669eee1db5f585c0a2e6c68c24&oe=5B0DC22E" width="240px">
