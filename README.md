@@ -8,6 +8,7 @@ The app has two main screens
 - Detail view of the selected movie
   - Floating Action Button is not working at the moment, It will be implemented at Stage 2
 
+<a href='https://play.google.com/store/apps/details?id=com.ahmetroid.popularmovies'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' width="240px"/></a>
 ## Requirements
 - Android Studio 3.0.1
 - Build Tools Version 27.0.3
